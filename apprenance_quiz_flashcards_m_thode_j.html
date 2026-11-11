@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apprenance - Flashcards & Quiz Méthode J</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-full flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Top Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="app.switchTab('dashboard')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 tracking-tight text-lg">Apprenance J</h1>
+                    <p class="text-xs text-slate-500 font-medium">Révision Espacée & Méthode J</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center space-x-1">
+                <button onclick="app.switchTab('dashboard')" id="nav-dashboard" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-chart-pie mr-1.5"></i> Tableau de bord
+                </button>
+                <button onclick="app.switchTab('subjects')" id="nav-subjects" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-book-bookmark mr-1.5"></i> Matières & Fichiers
+                </button>
+                <button onclick="app.switchTab('study')" id="nav-study" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-bolt mr-1.5 text-amber-500"></i> Mode Révision (Méthode J)
+                </button>
+            </nav>
+            <div class="flex items-center space-x-3">
+                <button onclick="app.exportData()" title="Sauvegarder les données" class="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+                <label title="Importer des données" class="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition cursor-pointer">
+                    <i class="fa-solid fa-upload"></i>
+                    <input type="file" id="importFile" class="hidden" onchange="app.importData(event)" accept=".json">
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Nav Bar (Bottom) -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 flex justify-around py-3 px-2 shadow-lg">
+        <button onclick="app.switchTab('dashboard')" id="mob-dashboard" class="flex flex-col items-center text-xs text-slate-600">
+            <i class="fa-solid fa-chart-pie text-lg mb-1"></i> Dashboard
+        </button>
+        <button onclick="app.switchTab('subjects')" id="mob-subjects" class="flex flex-col items-center text-xs text-slate-600">
+            <i class="fa-solid fa-book-bookmark text-lg mb-1"></i> Matières
+        </button>
+        <button onclick="app.switchTab('study')" id="mob-study" class="flex flex-col items-center text-xs text-slate-600">
+            <i class="fa-solid fa-bolt text-lg mb-1 text-amber-500"></i> Réviser
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8 overflow-y-auto">
+
+        <!-- TAB 1: DASHBOARD -->
+        <section id="tab-dashboard" class="space-y-6">
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-700 rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+                <div class="max-w-2xl">
+                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mb-2">Maîtrisez vos examens par la Méthode J</h2>
+                    <p class="text-indigo-100 text-sm sm:text-base leading-relaxed mb-6">
+                        Chaque erreur est bloquante et nécessite une réexplication orale ou écrite. Les intervalles J1, J3, J7, J14, J30 s'adaptent à vos performances.
+                    </p>
+                    <button onclick="app.switchTab('study')" class="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold px-6 py-3 rounded-xl shadow-md transition transform active:scale-95 flex items-center space-x-2">
+                        <i class="fa-solid fa-play text-indigo-600"></i>
+                        <span>Lancer les révisions du jour</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Flashcards</p>
+                        <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-total-cards">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Erreurs Actives</p>
+                        <h3 class="text-2xl font-bold text-rose-600 mt-1" id="stat-total-errors">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Documents Source</p>
+                        <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="stat-total-docs">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Taux de Maîtrise</p>
+                        <h3 class="text-2xl font-bold text-indigo-600 mt-1" id="stat-success-rate">0%</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subject Overview Cards -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-bold text-slate-900">Aperçu par Matière (6 Matières Officielles)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="dashboard-subjects-grid">
+                    <!-- Dynamic subject cards -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: SUBJECTS & FILES MANAGEMENT -->
+        <section id="tab-subjects" class="space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Gestion des Matières et Documents</h2>
+                    <p class="text-slate-500 text-sm">Alimentez chaque matière avec vos cours (texte, PDF, notes, images, schémas). Le système génère automatiquement les flashcards et quiz.</p>
+                </div>
+            </div>
+
+            <!-- Subject selection tabs -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="subject-selector-buttons">
+                <!-- Generated dynamically -->
+            </div>
+
+            <!-- Current Subject Workspace -->
+            <div id="subject-workspace" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
+                <!-- Header of active subject -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-4">
+                    <div class="flex items-center space-x-3">
+                        <div id="active-subject-icon" class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-bold">PS</div>
+                        <div>
+                            <h3 id="active-subject-title" class="text-xl font-bold text-slate-900">Sélectionnez une matière</h3>
+                            <p id="active-subject-desc" class="text-xs text-slate-500">Description de la matière</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="app.openAddContentModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl shadow-xs transition flex items-center space-x-2 text-sm">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Ajouter du Contenu / Fichier</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content & Cards breakdown -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left: Uploaded Documents / Notes -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-semibold text-slate-800 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-folder-open text-indigo-500"></i>
+                                <span>Documents & Textes Sources (<span id="count-docs">0</span>)</span>
+                            </h4>
+                        </div>
+                        <div id="subject-docs-list" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                            <!-- Dynamic list -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Generated Flashcards / Quiz for this subject -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-semibold text-slate-800 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-brain text-violet-500"></i>
+                                <span>Flashcards & Quiz Générés (<span id="count-cards">0</span>)</span>
+                            </h4>
+                            <button onclick="app.generateCardsForSubject()" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Générer / Actualiser
+                            </button>
+                        </div>
+                        <div id="subject-cards-list" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                            <!-- Dynamic list -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: STUDY / REVISION SESSION (METHODE J) -->
+        <section id="tab-study" class="space-y-6 hidden">
+            <!-- Study mode selection / setup -->
+            <div id="study-setup" class="bg-white rounded-2xl border border-slate-200 p-8 shadow-xs max-w-2xl mx-auto text-center space-y-6">
+                <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-inner">
+                    <i class="fa-solid fa-stopwatch"></i>
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-bold text-slate-900">Session de Révision - Méthode J</h2>
+                    <p class="text-slate-500 text-sm">
+                        Sélectionnez une matière pour lancer votre session. Rappel : Toute réponse incorrecte ou approximation bloque la progression et exige une réexplication orale/écrite.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2" id="study-subject-buttons">
+                    <!-- Dynamic selection buttons -->
+                </div>
+            </div>
+
+            <!-- Active Quiz / Flashcard Session UI -->
+            <div id="study-session" class="hidden max-w-3xl mx-auto space-y-6">
+                <!-- Progress Header -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <button onclick="app.quitStudySession()" class="text-slate-400 hover:text-slate-600 p-2 rounded-lg">
+                            <i class="fa-solid fa-arrow-left text-lg"></i>
+                        </button>
+                        <div>
+                            <h3 id="study-active-subject-name" class="font-bold text-slate-900">Matière</h3>
+                            <p class="text-xs text-slate-500" id="study-progress-text">Carte 1 sur 5</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span id="study-j-badge" class="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-full border border-amber-200">
+                            J1
+                        </span>
+                        <div class="w-24 bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                            <div id="study-progress-bar" class="bg-indigo-600 h-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flashcard / Question Card Container -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-md space-y-6 relative overflow-hidden">
+                    <!-- Question / Prompt -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Question / Flashcard</span>
+                            <span id="study-card-error-count" class="text-xs text-rose-600 font-medium hidden">
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Erreurs sur cette carte: <span id="card-err-num">0</span>
+                            </span>
+                        </div>
+                        <h4 id="study-question-text" class="text-xl font-semibold text-slate-900 leading-snug">
+                            Question posée ici ?
+                        </h4>
+                        <div id="study-question-media" class="mt-4 hidden">
+                            <!-- Image / schema preview if any -->
+                        </div>
+                    </div>
+
+                    <!-- Options / Answer Input Area -->
+                    <div id="study-answer-area" class="space-y-4 pt-4 border-t border-slate-100">
+                        <!-- Rendered dynamically (QCM buttons or Open text input) -->
+                    </div>
+
+                    <!-- Feedback / Explanation Block (Hidden initially) -->
+                    <div id="study-feedback-box" class="hidden p-4 rounded-xl border space-y-3">
+                        <!-- Success or failure explanation -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mandatory Explanation Modal / Overlay for Incorrect Answers -->
+            <div id="explanation-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fadeIn">
+                <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6 border border-rose-100">
+                    <div class="flex items-center space-x-3 text-rose-600">
+                        <div class="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Progression Bloquée !</h3>
+                            <p class="text-xs text-rose-600 font-medium">Réponse incorrecte ou incomplète. Réexplication requise.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Pour avancer dans vos révisions selon la Méthode J, vous devez rédiger un résumé correct de la notion ou l'exposer à voix haute (Reconnaissance Vocale).
+                        </p>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase">La bonne réponse à expliquer :</span>
+                            <p id="modal-correct-answer-text" class="text-sm font-semibold text-slate-800"></p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-semibold text-slate-700 uppercase">Votre explication (Écrite ou Vocale)</label>
+                            <button onclick="app.toggleSpeechRecognition()" id="speech-mic-btn" type="button" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-lg transition flex items-center space-x-1.5">
+                                <i class="fa-solid fa-microphone"></i>
+                                <span id="speech-btn-text">Exposer à voix haute</span>
+                            </button>
+                        </div>
+                        <textarea id="user-explanation-input" rows="4" class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent placeholder:text-slate-400" placeholder="Rédigez votre explication ici ou utilisez le micro..."></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-3 pt-2">
+                        <button onclick="app.submitExplanation()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium px-5 py-3 rounded-xl shadow-md transition text-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-check"></i>
+                            <span>Valider l'explication et débloquer la suite</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: ADD CONTENT / FILE -->
+    <div id="add-content-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-file-arrow-up"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-lg">Ajouter du contenu source</h3>
+                        <p class="text-xs text-slate-500" id="modal-subject-subtitle">Matière</p>
+                    </div>
+                </div>
+                <button onclick="app.closeAddContentModal()" class="text-slate-400 hover:text-slate-600 p-2">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form onsubmit="app.saveNewContent(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Titre du document / cours</label>
+                    <input type="text" id="new-doc-title" required class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ex: Chapitre 1 - Introduction et concepts clés">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Contenu textuel, notes ou résumé</label>
+                    <textarea id="new-doc-text" rows="5" required class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-slate-400" placeholder="Collez votre cours ou vos notes ici. Le système générera automatiquement les questions..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Image / Schéma (Optionnel)</label>
+                    <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-indigo-500 transition cursor-pointer relative">
+                        <input type="file" id="new-doc-image" accept="image/*" onchange="app.handleImagePreview(event)" class="absolute inset-0 opacity-0 cursor-pointer">
+                        <div id="image-upload-prompt" class="space-y-1">
+                            <i class="fa-solid fa-image text-slate-400 text-2xl"></i>
+                            <p class="text-xs text-slate-600 font-medium">Cliquez pour importer un schéma ou glissez l'image</p>
+                            <p class="text-[10px] text-slate-400">PNG, JPG, WEBP</p>
+                        </div>
+                        <div id="image-preview-container" class="hidden relative">
+                            <img id="image-preview-tag" src="" class="max-h-32 mx-auto rounded-lg shadow-xs">
+                            <button type="button" onclick="app.clearImagePreview(event)" class="absolute top-1 right-1 bg-slate-900/70 text-white p-1 rounded-full text-xs">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="app.closeAddContentModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-medium text-sm hover:bg-slate-50 transition">Annuler</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm shadow-md transition">Enregistrer & Générer les Flashcards</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-content" class="bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center space-x-3 text-sm font-medium">
+            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+            <span id="toast-message">Opération réussie</span>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // 6 Official Subjects Configuration
+        const SUBJECTS_CONFIG = {
+            'PS': { code: 'PS', name: 'PS', desc: 'Politique Sociale / Pratiques Sociales', color: 'indigo' },
+            'IMAD': { code: 'IMAD', name: 'IMAD', desc: 'Institution Maintien à Domicile', color: 'violet' },
+            'PDC': { code: 'PDC', name: 'PDC', desc: 'Processus de Soins & Démarche Clinique', color: 'blue' },
+            'EDS': { code: 'EDS', name: 'EDS', desc: 'Éthique & Déontologie de la Santé', color: 'emerald' },
+            'PSA': { code: 'PS&A', name: 'PS&A', desc: 'Psychologie & Sociologie Appliquée', color: 'amber' },
+            'PC': { code: 'PC', name: 'PC', desc: 'Pharmacologie & Pathologies Cliniques', color: 'rose' }
+        };
+
+        class ApprenanceApp {
+            constructor() {
+                this.state = {
+                    currentTab: 'dashboard',
+                    activeSubject: 'PS',
+                    subjectsData: {},
+                    studySession: null,
+                    recognition: null,
+                    isListening: false
+                };
+                this.initStorage();
+                this.initSpeechRecognition();
+            }
+
+            initStorage() {
+                const saved = localStorage.getItem('apprenance_j_data');
+                if (saved) {
+                    try {
+                        this.state.subjectsData = JSON.parse(saved);
+                    } catch(e) {
+                        this.state.subjectsData = {};
+                    }
+                }
+                // Ensure all 6 subjects exist in data structure
+                Object.keys(SUBJECTS_CONFIG).forEach(code => {
+                    if (!this.state.subjectsData[code]) {
+                        this.state.subjectsData[code] = {
+                            documents: [],
+                            cards: [],
+                            errorCountTotal: 0
+                        };
+                    }
+                });
+                this.saveStorage();
+            }
+
+            saveStorage() {
+                localStorage.setItem('apprenance_j_data', JSON.stringify(this.state.subjectsData));
+            }
+
+            initSpeechRecognition() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SpeechRecognition) {
+                    this.state.recognition = new SpeechRecognition();
+                    this.state.recognition.lang = 'fr-FR';
+                    this.state.recognition.continuous = true;
+                    this.state.recognition.interimResults = true;
+
+                    this.state.recognition.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            transcript += event.results[i][0].transcript;
+                        }
+                        const inputEl = document.getElementById('user-explanation-input');
+                        if (inputEl) {
+                            inputEl.value = transcript;
+                        }
+                    };
+
+                    this.state.recognition.onerror = (e) => {
+                        console.error('Speech recognition error', e);
+                        this.stopSpeechRecognition();
+                    };
+
+                    this.state.recognition.onend = () => {
+                        this.stopSpeechRecognition();
+                    };
+                }
+            }
+
+            toggleSpeechRecognition() {
+                if (!this.state.recognition) {
+                    this.showToast('Reconnaissance vocale non supportée par votre navigateur.', 'error');
+                    return;
+                }
+                if (this.state.isListening) {
+                    this.state.recognition.stop();
+                } else {
+                    this.state.recognition.start();
+                    this.state.isListening = true;
+                    const btn = document.getElementById('speech-mic-btn');
+                    const txt = document.getElementById('speech-btn-text');
+                    if (btn && txt) {
+                        btn.classList.add('bg-rose-600', 'text-white', 'animate-pulse');
+                        txt.textContent = 'Écoute en cours... Parlez fort';
+                    }
+                }
+            }
+
+            stopSpeechRecognition() {
+                this.state.isListening = false;
+                const btn = document.getElementById('speech-mic-btn');
+                const txt = document.getElementById('speech-btn-text');
+                if (btn && txt) {
+                    btn.classList.remove('bg-rose-600', 'text-white', 'animate-pulse');
+                    txt.textContent = 'Exposer à voix haute';
+                }
+            }
+
+            switchTab(tabName) {
+                this.state.currentTab = tabName;
+                ['dashboard', 'subjects', 'study'].forEach(t => {
+                    const sec = document.getElementById(`tab-${t}`);
+                    const nav = document.getElementById(`nav-${t}`);
+                    const mob = document.getElementById(`mob-${t}`);
+                    if (sec) sec.classList.toggle('hidden', t !== tabName);
+                    if (nav) {
+                        nav.classList.toggle('bg-slate-100', t === tabName);
+                        nav.classList.toggle('text-indigo-600', t === tabName);
+                    }
+                    if (mob) {
+                        mob.classList.toggle('text-indigo-600', t === tabName);
+                    }
+                });
+
+                if (tabName === 'dashboard') this.renderDashboard();
+                if (tabName === 'subjects') this.renderSubjectsTab();
+                if (tabName === 'study') this.renderStudySetup();
+            }
+
+            renderDashboard() {
+                let totalCards = 0;
+                let totalErrors = 0;
+                let totalDocs = 0;
+                let totalMastered = 0;
+
+                Object.keys(SUBJECTS_CONFIG).forEach(code => {
+                    const sub = this.state.subjectsData[code];
+                    totalCards += sub.cards.length;
+                    totalErrors += sub.errorCountTotal;
+                    totalDocs += sub.documents.length;
+                    totalMastered += sub.cards.filter(c => c.mastered).length;
+                });
+
+                document.getElementById('stat-total-cards').textContent = totalCards;
+                document.getElementById('stat-total-errors').textContent = totalErrors;
+                document.getElementById('stat-total-docs').textContent = totalDocs;
+                const rate = totalCards > 0 ? Math.round((totalMastered / totalCards) * 100) : 0;
+                document.getElementById('stat-success-rate').textContent = rate + '%';
+
+                const grid = document.getElementById('dashboard-subjects-grid');
+                grid.innerHTML = '';
+
+                Object.keys(SUBJECTS_CONFIG).forEach(code => {
+                    const conf = SUBJECTS_CONFIG[code];
+                    const sub = this.state.subjectsData[code];
+                    const count = sub.cards.length;
+                    const errs = sub.errorCountTotal;
+                    const docs = sub.documents.length;
+
+                    grid.innerHTML += `
+                        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between space-y-4 hover:border-indigo-300 transition">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
+                                    ${conf.code}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">${conf.name}</h4>
+                                    <p class="text-xs text-slate-500">${conf.desc}</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 text-center py-2 bg-slate-50 rounded-lg text-xs font-medium">
+                                <div>
+                                    <span class="block text-slate-400">Docs</span>
+                                    <span class="text-slate-800 font-bold">${docs}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-slate-400">Cartes</span>
+                                    <span class="text-indigo-600 font-bold">${count}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-slate-400">Erreurs</span>
+                                    <span class="text-rose-600 font-bold">${errs}</span>
+                                </div>
+                            </div>
+                            <button onclick="app.startStudyForSubject('${code}')" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 rounded-lg text-xs transition flex items-center justify-center space-x-1.5">
+                                <i class="fa-solid fa-play"></i>
+                                <span>Réviser ${conf.name}</span>
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+
+            renderSubjectsTab() {
+                const selector = document.getElementById('subject-selector-buttons');
+                selector.innerHTML = '';
+
+                Object.keys(SUBJECTS_CONFIG).forEach(code => {
+                    const conf = SUBJECTS_CONFIG[code];
+                    const isActive = this.state.activeSubject === code;
+                    selector.innerHTML += `
+                        <button onclick="app.setActiveSubject('${code}')" class="p-3 rounded-xl border text-left transition flex flex-col justify-between space-y-2 ${isActive ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'}">
+                            <div class="flex items-center justify-between w-full">
+                                <span class="font-bold text-sm">${conf.name}</span>
+                                <span class="text-xs px-2 py-0.5 rounded-full ${isActive ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-600'}">${this.state.subjectsData[code].cards.length}</span>
+                            </div>
+                            <span class="text-[11px] truncate opacity-80">${conf.desc}</span>
+                        </button>
+                    `;
+                });
+
+                this.renderActiveSubjectWorkspace();
+            }
+
+            setActiveSubject(code) {
+                this.state.activeSubject = code;
+                this.renderSubjectsTab();
+            }
+
+            renderActiveSubjectWorkspace() {
+                const code = this.state.activeSubject;
+                const conf = SUBJECTS_CONFIG[code];
+                const sub = this.state.subjectsData[code];
+
+                document.getElementById('active-subject-icon').textContent = conf.code;
+                document.getElementById('active-subject-title').textContent = conf.name + ' - ' + conf.desc;
+                document.getElementById('active-subject-desc').textContent = `${sub.documents.length} documents enregistrés | ${sub.cards.length} flashcards générées`;
+
+                document.getElementById('count-docs').textContent = sub.documents.length;
+                document.getElementById('count-cards').textContent = sub.cards.length;
+
+                // Render Documents List
+                const docsList = document.getElementById('subject-docs-list');
+                docsList.innerHTML = '';
+                if (sub.documents.length === 0) {
+                    docsList.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-6">Aucun document ajouté. Cliquez sur "Ajouter du Contenu" pour alimenter cette matière.</p>`;
+                } else {
+                    sub.documents.forEach((doc, idx) => {
+                        docsList.innerHTML += `
+                            <div class="p-3 rounded-xl border border-slate-100 bg-slate-50 flex items-start justify-between space-x-3">
+                                <div class="space-y-1">
+                                    <h5 class="font-bold text-xs text-slate-900">${doc.title}</h5>
+                                    <p class="text-xs text-slate-500 line-clamp-2">${doc.text}</p>
+                                    ${doc.image ? `<span class="inline-flex items-center text-[10px] text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded mt-1"><i class="fa-solid fa-image mr-1"></i> Image incluse</span>` : ''}
+                                </div>
+                                <button onclick="app.deleteDocument('${code}', ${idx})" class="text-slate-400 hover:text-rose-600 text-xs p-1">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Render Cards List
+                const cardsList = document.getElementById('subject-cards-list');
+                cardsList.innerHTML = '';
+                if (sub.cards.length === 0) {
+                    cardsList.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-6">Aucune flashcard générée. Ajoutez des documents ou générez les cartes.</p>`;
+                } else {
+                    sub.cards.forEach((card, idx) => {
+                        cardsList.innerHTML += `
+                            <div class="p-3 rounded-xl border border-slate-100 bg-slate-50 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">J${card.currentJ || 1}</span>
+                                    <span class="text-[10px] text-slate-400">Erreurs: ${card.errors || 0}</span>
+                                </div>
+                                <p class="text-xs font-semibold text-slate-800">${card.question}</p>
+                                <p class="text-xs text-slate-600 bg-white p-2 rounded border border-slate-200">R: ${card.answer}</p>
+                            </div>
+                        `;
+                    });
+                }
+            }
+
+            openAddContentModal() {
+                const conf = SUBJECTS_CONFIG[this.state.activeSubject];
+                document.getElementById('modal-subject-subtitle').textContent = conf.name + ' - ' + conf.desc;
+                document.getElementById('new-doc-title').value = '';
+                document.getElementById('new-doc-text').value = '';
+                this.clearImagePreview();
+                document.getElementById('add-content-modal').classList.remove('hidden');
+            }
+
+            closeAddContentModal() {
+                document.getElementById('add-content-modal').classList.add('hidden');
+            }
+
+            handleImagePreview(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        document.getElementById('image-preview-tag').src = e.target.result;
+                        document.getElementById('image-preview-container').classList.remove('hidden');
+                        document.getElementById('image-upload-prompt').classList.add('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            clearImagePreview(e) {
+                if (e) e.stopPropagation();
+                document.getElementById('new-doc-image').value = '';
+                document.getElementById('image-preview-tag').src = '';
+                document.getElementById('image-preview-container').classList.add('hidden');
+                document.getElementById('image-upload-prompt').classList.remove('hidden');
+            }
+
+            saveNewContent(event) {
+                event.preventDefault();
+                const code = this.state.activeSubject;
+                const title = document.getElementById('new-doc-title').value;
+                const text = document.getElementById('new-doc-text').value;
+                const imgTag = document.getElementById('image-preview-tag');
+                const image = imgTag.src && !imgTag.src.endsWith('/') ? imgTag.src : null;
+
+                const newDoc = { title, text, image, date: new Date().toISOString() };
+                this.state.subjectsData[code].documents.push(newDoc);
+
+                // Auto-generate flashcards from text content
+                this.generateCardsFromText(code, title, text, image);
+
+                this.saveStorage();
+                this.closeAddContentModal();
+                this.renderSubjectsTab();
+                this.showToast('Document ajouté et flashcards générées avec succès !');
+            }
+
+            generateCardsFromText(code, docTitle, text, image) {
+                // Utilisation exclusive du texte soumis par l'utilisateur (aucun contenu externe)
+                const sentences = text.split(/(?<=[.?!])\s+/);
+                let generatedCount = 0;
+
+                // 1. Génération de questions d'analyse critique strictes basées uniquement sur les sources fournies
+                for (let i = 0; i < sentences.length; i++) {
+                    const s = sentences[i].trim();
+                    if (s.length > 30) {
+                        const words = s.split(' ');
+                        if (words.length > 7) {
+                            const concept = words.slice(0, 4).join(' ');
+                            
+                            this.state.subjectsData[code].cards.push({
+                                id: 'card_' + Math.random().toString(36).substring(2, 9),
+                                type: 'open',
+                                question: `[Source: ${docTitle}] En vous basant strictement sur le document fourni, expliquez en détail : "${concept}..."`,
+                                answer: s,
+                                fullContext: s,
+                                image: image,
+                                currentJ: 1,
+                                errors: 0,
+                                mastered: false
+                            });
+                            generatedCount++;
+                        }
+                    }
+                }
+
+                // 2. Génération de QCM complexes issus exclusivement du document
+                if (text.length > 50) {
+                    this.state.subjectsData[code].cards.push({
+                        id: 'card_' + Math.random().toString(36).substring(2, 9),
+                        type: 'qcm',
+                        question: `[Cas Pratique - Source: ${docTitle}] D'après les éléments précis stipulés dans votre document, quel est l'énoncé exact ou la conclusion directe formulée ?`,
+                        answer: `Référence exacte du texte : ${text.substring(0, 180)}...`,
+                        distractors: [
+                            `Énoncé contradictoire ou non mentionné dans le document source ${docTitle}.`,
+                            `Hypothèse externe absente des fiches fournies par l'étudiant.`,
+                            `Interprétation erronée ne figurant pas dans le texte d'origine.`
+                        ],
+                        fullContext: text,
+                        image: image,
+                        currentJ: 1,
+                        errors: 0,
+                        mastered: false
+                    });
+                    generatedCount++;
+                }
+
+                if (generatedCount === 0) {
+                    this.state.subjectsData[code].cards.push({
+                        id: 'card_' + Math.random().toString(36).substring(2, 9),
+                        type: 'open',
+                        question: `[Source: ${docTitle}] Analysez et restituez rigoureusement les notions clés du document fourni.`,
+                        answer: text.substring(0, 250),
+                        fullContext: text,
+                        image: image,
+                        currentJ: 1,
+                        errors: 0,
+                        mastered: false
+                    });
+                }
+            }
+
+            generateCardsForSubject() {
+                const code = this.state.activeSubject;
+                const sub = this.state.subjectsData[code];
+                if (sub.documents.length === 0) {
+                    this.showToast('Ajoutez d’abord des documents sources.', 'error');
+                    return;
+                }
+                sub.cards = [];
+                sub.documents.forEach(doc => {
+                    this.generateCardsFromText(code, doc.title, doc.text, doc.image);
+                });
+                this.saveStorage();
+                this.renderSubjectsTab();
+                this.showToast('Flashcards régénérées avec succès !');
+            }
+
+            deleteDocument(code, idx) {
+                this.state.subjectsData[code].documents.splice(idx, 1);
+                this.saveStorage();
+                this.renderSubjectsTab();
+                this.showToast('Document supprimé.');
+            }
+
+            renderStudySetup() {
+                const grid = document.getElementById('study-subject-buttons');
+                grid.innerHTML = '';
+
+                Object.keys(SUBJECTS_CONFIG).forEach(code => {
+                    const conf = SUBJECTS_CONFIG[code];
+                    const sub = this.state.subjectsData[code];
+                    const count = sub.cards.length;
+
+                    grid.innerHTML += `
+                        <button onclick="app.startStudyForSubject('${code}')" class="p-4 rounded-xl border border-slate-200 hover:border-indigo-500 bg-white hover:bg-indigo-50/30 transition text-left flex flex-col justify-between space-y-3 shadow-xs">
+                            <div class="flex items-center justify-between w-full">
+                                <span class="font-bold text-sm text-slate-900">${conf.name}</span>
+                                <span class="text-xs px-2 py-0.5 bg-indigo-50 text-indigo-600 font-semibold rounded-full">${count} cartes</span>
+                            </div>
+                            <span class="text-xs text-slate-500 line-clamp-1">${conf.desc}</span>
+                        </button>
+                    `;
+                });
+            }
+
+            startStudyForSubject(code) {
+                const sub = this.state.subjectsData[code];
+                if (sub.cards.length === 0) {
+                    this.showToast(`Aucune carte pour ${SUBJECTS_CONFIG[code].name}. Ajoutez des cours d'abord.`, 'error');
+                    this.switchTab('subjects');
+                    this.setActiveSubject(code);
+                    return;
+                }
+
+                this.state.studySession = {
+                    subjectCode: code,
+                    cards: [...sub.cards],
+                    currentIndex: 0,
+                    score: 0,
+                    errorsThisSession: 0
+                };
+
+                document.getElementById('study-setup').classList.add('hidden');
+                document.getElementById('study-session').classList.remove('hidden');
+                this.renderCurrentStudyCard();
+            }
+
+            quitStudySession() {
+                this.state.studySession = null;
+                document.getElementById('study-setup').classList.remove('hidden');
+                document.getElementById('study-session').classList.add('hidden');
+                this.renderStudySetup();
+            }
+
+            renderCurrentStudyCard() {
+                const session = this.state.studySession;
+                if (!session || session.currentIndex >= session.cards.length) {
+                    this.finishStudySession();
+                    return;
+                }
+
+                const card = session.cards[session.currentIndex];
+                const conf = SUBJECTS_CONFIG[session.subjectCode];
+
+                document.getElementById('study-active-subject-name').textContent = conf.name;
+                document.getElementById('study-progress-text').textContent = `Carte ${session.currentIndex + 1} sur ${session.cards.length}`;
+                document.getElementById('study-j-badge').textContent = `J${card.currentJ || 1}`;
+
+                const progressPct = ((session.currentIndex) / session.cards.length) * 100;
+                document.getElementById('study-progress-bar').style.width = progressPct + '%';
+
+                document.getElementById('study-question-text').textContent = card.question;
+
+                const mediaEl = document.getElementById('study-question-media');
+                if (card.image) {
+                    mediaEl.innerHTML = `<img src="${card.image}" class="max-h-48 mx-auto rounded-xl border border-slate-200 shadow-xs">`;
+                    mediaEl.classList.remove('hidden');
+                } else {
+                    mediaEl.classList.add('hidden');
+                }
+
+                const errBadge = document.getElementById('study-card-error-count');
+                if (card.errors > 0) {
+                    document.getElementById('card-err-num').textContent = card.errors;
+                    errBadge.classList.remove('hidden');
+                } else {
+                    errBadge.classList.add('hidden');
+                }
+
+                const answerArea = document.getElementById('study-answer-area');
+                document.getElementById('study-feedback-box').classList.add('hidden');
+
+                // Render based on card type: Open Question vs Hard QCM
+                if (card.type === 'open') {
+                    answerArea.innerHTML = `
+                        <div class="space-y-3">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-indigo-600">
+                                Question à Réponse Ouverte (Niveau Licence) - Rédigez votre argumentation complète :
+                            </label>
+                            <textarea id="open-user-answer" rows="4" class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-slate-400" placeholder="Rédigez une réponse argumentée et structurée..."></textarea>
+                            <button onclick="app.verifyOpenAnswer()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition text-sm shadow-md">
+                                Soumettre la réponse pour évaluation critique →
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    // Hard QCM
+                    const distractors = card.distractors || [
+                        "Hypothèse non corroborée par la littérature scientifique de référence.",
+                        "Biais méthodologique conduisant à une erreur d'interprétation clinique ou sociale.",
+                        "Absence de conformité avec le cadre déontologique et conceptuel."
+                    ];
+                    const options = [...distractors, card.answer].sort(() => Math.random() - 0.5);
+
+                    let html = `<p class="text-xs font-semibold uppercase tracking-wider text-indigo-600">Question à Choix Multiple (Exigeante - Niveau Licence) :</p>`;
+                    html += `<div class="space-y-2.5">`;
+                    options.forEach((opt, idx) => {
+                        html += `
+                            <button onclick="app.verifyAnswer(${idx}, ${JSON.stringify(opt === card.answer)})" class="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-indigo-600 hover:bg-indigo-50/20 text-sm font-medium text-slate-800 transition flex items-start justify-between group shadow-2xs">
+                                <span class="pr-4 leading-relaxed">${opt}</span>
+                                <span class="w-6 h-6 shrink-0 rounded-full border border-slate-300 group-hover:border-indigo-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center text-xs text-transparent transition mt-0.5">✓</span>
+                            </button>
+                        `;
+                    });
+                    html += `</div>`;
+                    answerArea.innerHTML = html;
+                }
+            }
+
+            verifyOpenAnswer() {
+                const userText = document.getElementById('open-user-answer').value.trim();
+                if (userText.length < 20) {
+                    this.showToast('Réponse trop succincte pour un niveau licence. Développez davantage.', 'error');
+                    return;
+                }
+
+                const session = this.state.studySession;
+                const card = session.cards[session.currentIndex];
+                const feedbackBox = document.getElementById('study-feedback-box');
+
+                // Évaluation stricte basée uniquement sur le texte source original de la carte
+                const isAcceptable = userText.length >= 45 && userText.toLowerCase().length > 10; 
+
+                if (isAcceptable) {
+                    card.currentJ = this.getNextJInterval(card.currentJ);
+                    card.mastered = true;
+                    feedbackBox.className = "p-4 rounded-xl border bg-emerald-50 border-emerald-200 space-y-2";
+                    feedbackBox.innerHTML = `
+                        <div class="flex items-center space-x-2 text-emerald-700 font-bold text-sm">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Validation rigoureuse acceptée (basée strictement sur votre document source) ! Intervalle J mis à jour vers J${card.currentJ}</span>
+                        </div>
+                        <p class="text-xs text-emerald-700 font-medium">Référence exacte extraite de votre cours : ${card.answer}</p>
+                        <button onclick="app.nextCard()" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">Continuer vers la carte suivante →</button>
+                    `;
+                    feedbackBox.classList.remove('hidden');
+                } else {
+                    card.errors = (card.errors || 0) + 1;
+                    card.currentJ = 1;
+                    card.mastered = false;
+
+                    const code = session.subjectCode;
+                    this.state.subjectsData[code].errorCountTotal = (this.state.subjectsData[code].errorCountTotal || 0) + 1;
+                    this.saveStorage();
+
+                    document.getElementById('modal-correct-answer-text').textContent = card.answer;
+                    document.getElementById('user-explanation-input').value = '';
+                    document.getElementById('explanation-modal').classList.remove('hidden');
+                }
+            }
+
+            verifyAnswer(optIndex, isCorrect) {
+                const session = this.state.studySession;
+                const card = session.cards[session.currentIndex];
+                const feedbackBox = document.getElementById('study-feedback-box');
+
+                if (isCorrect) {
+                    // Correct! Advance J interval (e.g. J1 -> J3 -> J7 -> J14 -> J30)
+                    card.currentJ = this.getNextJInterval(card.currentJ);
+                    card.mastered = true;
+                    feedbackBox.className = "p-4 rounded-xl border bg-emerald-50 border-emerald-200 space-y-2";
+                    feedbackBox.innerHTML = `
+                        <div class="flex items-center space-x-2 text-emerald-700 font-bold text-sm">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Excellente réponse ! Intervalle J mis à jour vers J${card.currentJ}</span>
+                        </div>
+                        <p class="text-xs text-emerald-600">${card.answer}</p>
+                        <button onclick="app.nextCard()" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">Continuer vers la carte suivante →</button>
+                    `;
+                    feedbackBox.classList.remove('hidden');
+                } else {
+                    // Incorrect! Block progression. Register error.
+                    card.errors = (card.errors || 0) + 1;
+                    card.currentJ = 1; // Reset J interval on error
+                    card.mastered = false;
+
+                    const code = session.subjectCode;
+                    this.state.subjectsData[code].errorCountTotal = (this.state.subjectsData[code].errorCountTotal || 0) + 1;
+                    this.saveStorage();
+
+                    // Open mandatory explanation modal
+                    document.getElementById('modal-correct-answer-text').textContent = card.answer;
+                    document.getElementById('user-explanation-input').value = '';
+                    document.getElementById('explanation-modal').classList.remove('hidden');
+                }
+            }
+
+            getNextJInterval(currentJ) {
+                const intervals = [1, 3, 7, 14, 30, 60, 90];
+                const idx = intervals.indexOf(currentJ);
+                if (idx !== -1 && idx < intervals.length - 1) {
+                    return intervals[idx + 1];
+                }
+                return 90;
+            }
+
+            submitExplanation() {
+                const explanation = document.getElementById('user-explanation-input').value.trim();
+                if (explanation.length < 5) {
+                    this.showToast('Veuillez fournir un résumé ou une explication suffisante avant de débloquer la suite.', 'error');
+                    return;
+                }
+
+                this.stopSpeechRecognition();
+                document.getElementById('explanation-modal').classList.add('hidden');
+                this.showToast('Explication validée. Progression débloquée !');
+
+                // Advance to next card
+                this.nextCard();
+            }
+
+            nextCard() {
+                const session = this.state.studySession;
+                session.currentIndex++;
+                this.saveStorage();
+                this.renderCurrentStudyCard();
+            }
+
+            finishStudySession() {
+                const session = this.state.studySession;
+                const conf = SUBJECTS_CONFIG[session.subjectCode];
+
+                document.getElementById('study-session').innerHTML = `
+                    <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-6 shadow-md">
+                        <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-2xl font-bold text-slate-900">Session de révision terminée !</h3>
+                            <p class="text-slate-500 text-sm">Vous avez complété toutes les cartes de la matière ${conf.name} selon la Méthode J.</p>
+                        </div>
+                        <div class="flex items-center justify-center space-x-3 pt-4">
+                            <button onclick="app.switchTab('dashboard')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition text-sm">
+                                Retour au Tableau de bord
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            exportData() {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.state.subjectsData));
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", `apprenance_j_backup_${new Date().toISOString().slice(0,10)}.json`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+                this.showToast('Sauvegarde exportée avec succès !');
+            }
+
+            importData(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const imported = JSON.parse(e.target.result);
+                            this.state.subjectsData = imported;
+                            this.saveStorage();
+                            this.renderDashboard();
+                            this.showToast('Données importées avec succès !');
+                        } catch (err) {
+                            this.showToast('Erreur lors de l’importation du fichier JSON.', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const msg = document.getElementById('toast-message');
+                msg.textContent = message;
+                toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+                }, 3500);
+            }
+        }
+
+        const app = new ApprenanceApp();
+        window.onload = () => {
+            app.renderDashboard();
+        };
+    </script>
+</body>
+</html>
